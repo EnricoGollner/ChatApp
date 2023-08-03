@@ -12,6 +12,7 @@ class MainApp extends StatelessWidget {
         appBarTheme: const AppBarTheme(
           centerTitle: true,
         ),
+        iconTheme: const IconThemeData(color: Colors.blue),
       ),
       home: const ChatPage(),
     );
