@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:chat_app/app/widgets/text_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -11,10 +15,30 @@ class ChatPage extends StatefulWidget {
 }
 
 class _HomePageState extends State<ChatPage> {
-  void _sendMessage(String text) {
-    FirebaseFirestore.instance.collection("messages").add({
-      "text": text,
-    });
+  void _sendMessage({String? text, File? imgFile}) async {
+    Map<String, dynamic> dataMap = {};
+
+    if (imgFile != null) {
+      const uuid = Uuid();
+
+      final UploadTask task = FirebaseStorage.instance
+          .ref()
+          .child(uuid.v1())
+          .putFile(imgFile); // armazenando o arquivo no FirebaseStorage
+
+      TaskSnapshot taskSnapshot =
+          await task; // acessando o Snapshot da task com várias infos da mesma após ela ser concluída.
+      String url = await taskSnapshot.ref
+          .getDownloadURL(); // acessando a url de donwload da imagem contida no snapshot da task concluída.
+
+      dataMap['imgUrl'] = url;
+    }
+
+    if (text != null) {
+      dataMap['text'] = text;
+    }
+
+    FirebaseFirestore.instance.collection("messages").add(dataMap);
   }
 
   @override
