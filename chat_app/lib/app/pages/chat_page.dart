@@ -1,11 +1,8 @@
-import 'dart:io';
-
+import 'package:chat_app/app/controllers/chat_controller.dart';
 import 'package:chat_app/app/widgets/text_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -15,31 +12,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _HomePageState extends State<ChatPage> {
-  void _sendMessage({String? text, File? imgFile}) async {
-    Map<String, dynamic> dataMap = {};
-
-    if (imgFile != null) {
-      const uuid = Uuid();
-
-      final UploadTask task = FirebaseStorage.instance
-          .ref()
-          .child(uuid.v1())
-          .putFile(imgFile); // armazenando o arquivo no FirebaseStorage
-
-      TaskSnapshot taskSnapshot =
-          await task; // acessando o Snapshot da task com várias infos da mesma após ela ser concluída.
-      String url = await taskSnapshot.ref
-          .getDownloadURL(); // acessando a url de donwload da imagem contida no snapshot da task concluída.
-
-      dataMap['imgUrl'] = url;
-    }
-
-    if (text != null) {
-      dataMap['text'] = text;
-    }
-
-    FirebaseFirestore.instance.collection("messages").add(dataMap);
-  }
+  final controller = ChatController();
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +27,45 @@ class _HomePageState extends State<ChatPage> {
           ),
         ],
       ),
-      body: TextWidget(
-        sendMessage: _sendMessage,
+      body: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder(
+              stream:
+                  FirebaseFirestore.instance.collection("messages").snapshots(),
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.none:
+                  case ConnectionState.waiting:
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+
+                  default:
+                    List<DocumentSnapshot> documents =
+                        snapshot.data!.docs.reversed.toList();
+
+                    return ListView.builder(
+                      itemCount: documents.length,
+                      reverse: true, // mais recente primeiro
+                      itemBuilder: (context, index) {
+                        final currentDoc =
+                            documents[index].data() as Map<String, dynamic>;
+                        final currentText = currentDoc["text"];
+
+                        return ListTile(
+                          title: Text(currentText),
+                        );
+                      },
+                    );
+                }
+              },
+            ),
+          ),
+          TextWidget(
+            sendMessage: controller.sendMessage,
+          ),
+        ],
       ),
     );
   }
