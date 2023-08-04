@@ -16,14 +16,14 @@ class _HomePageState extends State<ChatPage> {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
 
-  User? _currentUser;
+  User? currentUser;
 
   @override
   void initState() {
     super.initState();
 
     FirebaseAuth.instance.authStateChanges().listen((user) {
-      _currentUser = user;
+      currentUser = user;
     });
   }
 

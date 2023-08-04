@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -19,7 +18,6 @@ class ChatController {
     if (user != null) return user;
 
     // Se for null, vamos fazer o login:
-
     try {
       final GoogleSignInAccount? googleSignInAccount =
           await googleSignIn.signIn();
@@ -33,12 +31,11 @@ class ChatController {
         accessToken: googleSignInAuthentication.accessToken,
       );
 
-      final UserCredential authResult =
+      final UserCredential userCredential =
           await FirebaseAuth.instance.signInWithCredential(credential);
 
-      final User? user = authResult
-          .user; // através desse user, conseguimos validar o acesso dele em cada uma das partes do banco de dados
-
+      // através desse user, conseguimos validar o acesso dele em cada uma das partes do banco de dados
+      final User? user = userCredential.user;
       return user;
     } catch (e) {
       print(e);
@@ -89,30 +86,3 @@ class ChatController {
         .set(messageData);
   }
 }
-
-
-/*
-    Map<String, dynamic> dataMap = {};
-
-    if (imgFile != null) {
-      const uuid = Uuid();
-
-      final UploadTask task = FirebaseStorage.instance
-          .ref()
-          .child(uuid.v1())
-          .putFile(imgFile); // armazenando o arquivo no FirebaseStorage
-
-      TaskSnapshot taskSnapshot =
-          await task; // acessando o Snapshot da task com várias infos da mesma após ela ser concluída.
-      String url = await taskSnapshot.ref
-          .getDownloadURL(); // acessando a url de donwload da imagem contida no snapshot da task concluída.
-
-      dataMap['imgUrl'] = url;
-    }
-
-    if (text != null) {
-      dataMap['text'] = text;
-    }
-
-    FirebaseFirestore.instance.collection("messages").add(dataMap);
-*/
