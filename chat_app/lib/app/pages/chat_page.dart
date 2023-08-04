@@ -1,6 +1,7 @@
 import 'package:chat_app/app/controllers/chat_controller.dart';
 import 'package:chat_app/app/widgets/text_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 
@@ -12,10 +13,24 @@ class ChatPage extends StatefulWidget {
 }
 
 class _HomePageState extends State<ChatPage> {
-  final controller = ChatController();
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
+
+  User? _currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      _currentUser = user;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final controller = ChatController(scaffoldKey: scaffoldMessengerKey);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Chat - Nome do user"),
