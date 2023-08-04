@@ -9,10 +9,10 @@ class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
 
   @override
-  State<ChatPage> createState() => _HomePageState();
+  State<ChatPage> createState() => _ChatPageState();
 }
 
-class _HomePageState extends State<ChatPage> {
+class _ChatPageState extends State<ChatPage> {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
 
@@ -66,10 +66,17 @@ class _HomePageState extends State<ChatPage> {
                       itemBuilder: (context, index) {
                         final currentDoc =
                             documents[index].data() as Map<String, dynamic>;
-                        final currentText = currentDoc["text"];
+                        final String? currentMessage = currentDoc["text"];
+                        final String? currentImgUrl = currentDoc["imgUrl"];
+
+                        if (currentMessage != null) {
+                          return ListTile(
+                            title: Text(currentMessage),
+                          );
+                        }
 
                         return ListTile(
-                          title: Text(currentText),
+                          leading: Image.network(currentImgUrl!),
                         );
                       },
                     );
