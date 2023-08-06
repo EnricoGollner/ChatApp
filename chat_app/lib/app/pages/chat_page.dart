@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 
+import '../widgets/chat_message_widget.dart';
+
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
 
@@ -29,12 +31,13 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = ChatController(scaffoldKey: scaffoldMessengerKey);
+    final controller = ChatController(
+        scaffoldMessengerKey: scaffoldMessengerKey, currentUser: currentUser);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Chat - Nome do user"),
-        // elevation: 0,
+        elevation: 0,
         actions: [
           IconButton(
             onPressed: () {},
@@ -43,6 +46,7 @@ class _ChatPageState extends State<ChatPage> {
         ],
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: StreamBuilder(
@@ -64,19 +68,14 @@ class _ChatPageState extends State<ChatPage> {
                       itemCount: documents.length,
                       reverse: true, // mais recente primeiro
                       itemBuilder: (context, index) {
-                        final currentDoc =
+                        final currentDocData =
                             documents[index].data() as Map<String, dynamic>;
-                        final String? currentMessage = currentDoc["text"];
-                        final String? currentImgUrl = currentDoc["imgUrl"];
+                        final String? currentMessage = currentDocData["text"];
+                        final String? currentImgUrl = currentDocData["imgUrl"];
 
-                        if (currentMessage != null) {
-                          return ListTile(
-                            title: Text(currentMessage),
-                          );
-                        }
-
-                        return ListTile(
-                          leading: Image.network(currentImgUrl!),
+                        return ChatMessage(
+                          messageData: currentDocData,
+                          isMine: controller.verifySender(),
                         );
                       },
                     );

@@ -9,15 +9,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatController {
   final GoogleSignIn googleSignIn = GoogleSignIn();
-  final GlobalKey<ScaffoldMessengerState> scaffoldKey;
+  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey;
 
-  ChatController({required this.scaffoldKey});
+  ChatController({required this.scaffoldMessengerKey, this.currentUser});
 
-  Future<User?> getUser({User? user}) async {
+  final User? currentUser;
+  // Se for null, vamos fazer o login:
+  GoogleSignInAccount? googleSignInAccount;
+
+  bool verifySender() {
+    return true;
+  }
+
+  Future<User?> getUser() async {
     // verificando se está logado
-    if (user != null) return user;
+    if (currentUser != null) return currentUser;
 
-    // Se for null, vamos fazer o login:
     try {
       final GoogleSignInAccount? googleSignInAccount =
           await googleSignIn.signIn();
@@ -38,22 +45,20 @@ class ChatController {
       final User? user = userCredential.user;
       return user;
     } catch (e) {
-      print(e);
       return null; // aí se o usuário atual for null, vai para o login
     }
   }
 
-  void sendMessage({
-    String? text,
-    File? imgFile,
-  }) async {
+  void sendMessage({String? text, File? imgFile}) async {
     final User? user = await getUser();
 
     if (user == null) {
-      scaffoldKey.currentState!.showSnackBar(
+      scaffoldMessengerKey.currentState!.showSnackBar(
         const SnackBar(
-          content: Text("Não foi possível fazer o login. Tente novamente!"),
-          backgroundColor: Colors.red,
+          content: Text(
+            "Erro",
+            style: TextStyle(backgroundColor: Colors.red),
+          ),
         ),
       );
       return;
