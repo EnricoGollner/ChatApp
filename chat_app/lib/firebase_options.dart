@@ -24,12 +24,12 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        return android;
-      case TargetPlatform.iOS:
         throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
+          'DefaultFirebaseOptions have not been configured for android - '
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
+      case TargetPlatform.iOS:
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -52,11 +52,14 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDisiloHhOoXtPHpZ0ReaxgAaCC513AWpM',
-    appId: '1:819952879259:android:3233085a145ca52aa7283e',
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyA96letRGU6x1y6wTbrUhmXL1Rnc72Yo1s',
+    appId: '1:819952879259:ios:8f784da08a02b6d7a7283e',
     messagingSenderId: '819952879259',
     projectId: 'chatflutterapp-e8d86',
     storageBucket: 'chatflutterapp-e8d86.appspot.com',
+    androidClientId: '819952879259-5dhll8qb0cp953s8gaqnk87k7q3tk0ci.apps.googleusercontent.com',
+    iosClientId: '819952879259-pai38lui7mrlvvirvstvte6h0vgtrku2.apps.googleusercontent.com',
+    iosBundleId: 'com.example.chatApp',
   );
 }
