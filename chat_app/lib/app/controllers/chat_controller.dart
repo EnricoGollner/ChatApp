@@ -13,7 +13,7 @@ class ChatController {
 
   ChatController({required this.scaffoldMessengerKey, this.currentUser});
 
-  final User? currentUser;
+  User? currentUser;
   // Se for null, vamos fazer o login:
   GoogleSignInAccount? googleSignInAccount;
 
