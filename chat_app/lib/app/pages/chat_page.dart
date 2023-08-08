@@ -60,59 +60,60 @@ class _ChatPageState extends State<ChatPage> {
               : Container(),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection("messages")
-                  .orderBy('time')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.none:
-                  case ConnectionState.waiting:
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection("messages")
+                    .orderBy('time')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.none:
+                    case ConnectionState.waiting:
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
 
-                  default:
-                    List<DocumentSnapshot> documents =
-                        snapshot.data!.docs.reversed.toList();
+                    default:
+                      List<DocumentSnapshot> documents =
+                          snapshot.data!.docs.reversed.toList();
 
-                    return ListView.builder(
-                      itemCount: documents.length,
-                      reverse: true, // mais recente primeiro
-                      itemBuilder: (context, index) {
-                        final currentDocData =
-                            documents[index].data() as Map<String, dynamic>;
+                      return ListView.builder(
+                        itemCount: documents.length,
+                        reverse: true, // mais recente primeiro
+                        itemBuilder: (context, index) {
+                          final currentDocData =
+                              documents[index].data() as Map<String, dynamic>;
 
-                        return ChatMessage(
-                          messageData: currentDocData,
-                          isMine:
-                              controller.verifySender(currentDocData["uid"]),
-                        );
-                      },
-                    );
+                          return ChatMessage(
+                            messageData: currentDocData,
+                            isMine:
+                                controller.verifySender(currentDocData["uid"]),
+                          );
+                        },
+                      );
+                  }
+                },
+              ),
+            ),
+            AnimatedBuilder(
+              animation: controller.isLoadingImage,
+              builder: (context, child) {
+                if (controller.isLoadingImage.value == false) {
+                  return Container();
                 }
+
+                return const LinearProgressIndicator();
               },
             ),
-          ),
-          AnimatedBuilder(
-            animation: controller.isLoadingImage,
-            builder: (context, child) {
-              if (controller.isLoadingImage.value == false) {
-                return Container();
-              }
-
-              return const LinearProgressIndicator();
-            },
-          ),
-          TextWidget(
-            sendMessage: controller.sendMessage,
-          ),
-        ],
+            TextWidget(
+              sendMessage: controller.sendMessage,
+            ),
+          ],
+        ),
       ),
     );
   }
