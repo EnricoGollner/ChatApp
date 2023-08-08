@@ -25,7 +25,9 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
 
     FirebaseAuth.instance.authStateChanges().listen((user) {
-      currentUser = user;
+      setState(() {
+        currentUser = user;
+      });
     });
   }
 
@@ -33,16 +35,27 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     final controller = ChatController(
         scaffoldMessengerKey: scaffoldMessengerKey, currentUser: currentUser);
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Chat - Nome do user"),
+        title: Text(controller.currentUser != null
+            ? 'Chat de ${controller.currentUser!.displayName}'
+            : 'Chat App'),
         elevation: 0,
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.exit_to_app),
-          ),
+          controller.currentUser != null
+              ? IconButton(
+                  onPressed: () {
+                    FirebaseAuth.instance.signOut();
+                    controller.googleSignIn.signOut();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Sign-out com sucesso!"),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.exit_to_app))
+              : Container(),
         ],
       ),
       body: Column(
