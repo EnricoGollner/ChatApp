@@ -15,7 +15,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
 
   User? currentUser;
@@ -34,8 +34,10 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     final controller = ChatController(
-        scaffoldMessengerKey: scaffoldMessengerKey, currentUser: currentUser);
+        scaffoldMessengerStateKey: _scaffoldMessengerKey,
+        currentUser: currentUser);
     return Scaffold(
+      key: _scaffoldMessengerKey,
       appBar: AppBar(
         title: Text(controller.currentUser != null
             ? 'Chat de ${controller.currentUser!.displayName}'
@@ -49,7 +51,7 @@ class _ChatPageState extends State<ChatPage> {
                     controller.googleSignIn.signOut();
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text("Sign-out com sucesso!"),
+                        content: Text(""),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -63,8 +65,10 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: StreamBuilder(
-              stream:
-                  FirebaseFirestore.instance.collection("messages").snapshots(),
+              stream: FirebaseFirestore.instance
+                  .collection("messages")
+                  .orderBy('time')
+                  .snapshots(),
               builder: (context, snapshot) {
                 switch (snapshot.connectionState) {
                   case ConnectionState.none:
@@ -83,18 +87,27 @@ class _ChatPageState extends State<ChatPage> {
                       itemBuilder: (context, index) {
                         final currentDocData =
                             documents[index].data() as Map<String, dynamic>;
-                        final String? currentMessage = currentDocData["text"];
-                        final String? currentImgUrl = currentDocData["imgUrl"];
 
                         return ChatMessage(
                           messageData: currentDocData,
-                          isMine: controller.verifySender(),
+                          isMine:
+                              controller.verifySender(currentDocData["uid"]),
                         );
                       },
                     );
                 }
               },
             ),
+          ),
+          AnimatedBuilder(
+            animation: controller.isLoadingImage,
+            builder: (context, child) {
+              if (controller.isLoadingImage.value == false) {
+                return Container();
+              }
+
+              return const LinearProgressIndicator();
+            },
           ),
           TextWidget(
             sendMessage: controller.sendMessage,
